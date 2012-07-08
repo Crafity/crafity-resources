@@ -1,18 +1,60 @@
 {
 	"name": "crafity-resources",
 	"description": "Generic resource provider",
-	"version": "0.1.0",
+	"version": "0.0.1",
 	"author": "Bart Riemens <briemens@crafity.com>",
+	"homepage": "https://github.com/Crafity/crafity-resources/wiki",
 	"keywords": ["crafity", "resource", "globalization", "messages", "language"],
-	"repository": "git://github.com/crafity/crafity-modules",
-	"main": "./resources.js",
-	"engines": {
-		"node": "> 0.4.x < 0.7.0"
-	},
-	"scripts" : {
-		"prepublish" : "npm prune"
-	},
+	"maintainers": [
+		{
+			"name": "Bart Riemens",
+			"email": "briemens@crafity.com",
+			"web": "http://crafity.com/about/bart"
+		},
+		{
+			"name": "Galina Slavova",
+			"email": "galina@crafity.com",
+			"web": "http://crafity.com/about/galina"
+		}
+	],
+	"contributors": [
+		{
+			"name": "Galina Slavova",
+			"email": "galina@crafity.com",
+			"web": "http://crafity.com/about/galina"
+		},
+		{
+			"name": "Bart Riemens",
+			"email": "briemens@crafity.com",
+			"web": "http://crafity.com/about/bart"
+		}
+	],
+	"main": "./main.js",
+	"directories": {},
+	"licenses": [
+		{
+			"type": "The MIT License",
+			"url": "https://github.com/Crafity/crafity-resources/blob/master/LICENSE"
+		}
+	],
+	"bugs": "https://github.com/Crafity/crafity-resources/issues",
+	"repositories": [
+		{
+			"type": "git",
+			"url": "https://github.com/Crafity/crafity-resources.git"
+		}
+	],
 	"dependencies": {
-		"crafity-filesystem": "0.1.0"
+		"crafity-core": "*",
+		"crafity-filesystem": "*",
+		"crafity-jstest": "*"
+	},
+	"engines": {
+		"node": "*"
+	},
+	"scripts": {
+		"prepublish": "npm prune",
+		"test": "./runtests"
 	}
 }
+

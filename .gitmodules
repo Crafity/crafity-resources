@@ -1,6 +1,0 @@
-[submodule "node_modules/crafity-core"]
-	path = node_modules/crafity-core
-	url = http://github.com/Crafity/crafity-core.git
-[submodule "node_modules/crafity-filesystem"]
-	path = node_modules/crafity-filesystem
-	url = http://github.com/Crafity/crafity-filesystem.git

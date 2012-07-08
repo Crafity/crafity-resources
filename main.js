@@ -17,6 +17,18 @@ var fs = require('crafity-filesystem')
 	, objects = core.objects;
 
 /**
+ * Module name.
+ */
+
+exports.fullname = "crafity-resources";
+
+/**
+ * Module version.
+ */
+
+exports.version = '0.0.1';
+
+/**
  * Loaded configuration
  */
 

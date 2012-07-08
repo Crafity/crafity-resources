@@ -1,9 +1,9 @@
 {
 	"name": "crafity-resources",
 	"description": "Generic resource provider",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"author": "Bart Riemens <briemens@crafity.com>",
-	"homepage": "https://github.com/Crafity/crafity-resources/wiki",
+	"homepage": "https://github.com/Crafity/crafity-resources#readme",
 	"keywords": ["crafity", "resource", "globalization", "messages", "language"],
 	"maintainers": [
 		{

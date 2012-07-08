@@ -14,35 +14,52 @@ var jstest = require('crafity-jstest')
 	, assert = jstest.assert
 	, context = jstest.createContext()
 	, fs = require('crafity-filesystem')
-	, main = require('../main')
+	, main
 	;
 
 (function packageTests() {
 	"use strict";
-
-// Print out the name of the test module
-	console.log("Testing 'package.json' in current module... ");
 
 	/**
 	 * The tests
 	 */
 	var tests = {
 
-		'The module must have package.json file': function () {
+		'The module must have main.js file': function () {
 
-			fs.readFile("./package.json", function (err, data) {
-				assert.isDefined(data, "Expected package.json defined");
-			});
+			main = require('../main');
+			assert.isDefined(main, "Expected main to be defined");
+			assert.areEqual(main, main.__proto__, "Expected main to be the standard module");
 		},
+
+		'The module must have a fullname': function () {
+			assert.isDefined(main.fullname, "Expected fullname to be defined");
+		},
+
+		'The module must have a version number': function () {
+			assert.isDefined(main.version, "Expected version number to be defined");
+		},
+
+		'The module must have package.json file': function (context) {
+			fs.readFileSync("./package.json");
+		},
+
+		'The module must have the same name as quoted in package.json': function () {
+
+			var data = fs.readFileSync("./package.json")
+				, json = JSON.parse(data.toString());
+
+			assert.areEqual(json.name, main.fullname, "Expected module name to be the same in both places.");
+
+		},
+
 		'The module must have the same version as quoted in package.json': function () {
 
-			fs.readFile("./package.json", function (err, data) {
-				var json = JSON.parse(data.toString());
-				console.log("package.version =", json.version);
+			var data = fs.readFileSync("./package.json")
+				, json = JSON.parse(data.toString());
 
-				assert.isDefined(json.version, "Expected fs to be defined");
-				assert.areEqual(main.version, json.version, "Expected the same module version!");
-			});
+			assert.isDefined(json.version, "Expected fs to be defined");
+			assert.areEqual(main.version, json.version, "Expected the same module version!");
 		}
 
 	};

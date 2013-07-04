@@ -88,9 +88,9 @@ exports.configure = function (options, callback) {
 							, languages = resources.getLanguages()
 							, url = req.query["return"] || req.headers.referer || "/";
 
-						res.local("resources", resources);
-						res.local("language", language);
-						res.local("languages", languages);
+//						res.local("resources", resources);
+//						res.local("language", language);
+//						res.local("languages", languages);
 						if (language) {
 							res.cookie("lang", language, { path: "/", expires: new Date(Date.now() + sixMonths), httpOnly: true });
 						} else {

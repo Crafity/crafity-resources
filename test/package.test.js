@@ -1,18 +1,21 @@
-/*jslint node:true, white:true */
+/*jslint node: true, bitwise: true, unparam: true, maxerr: 50, white: true, stupid: true */
+"use strict";
+
 /*!
  * package.test - package.json tests
- * Copyright(c) 2011 Crafity
- * Copyright(c) 2012 Galina Slavova
- * Copyright(c) 2012 Bart Riemens
+ * Copyright(c) 2013 Crafity
+ * Copyright(c) 2013 Bart Riemens
+ * Copyright(c) 2013 Galina Slavova
  * MIT Licensed
  */
 
 /**
  * Test dependencies.
  */
+
 var jstest = require('crafity-jstest')
 	, assert = jstest.assert
-	, context = jstest.createContext()
+	, context = jstest.createContext("Module Package Test")
 	, fs = require('crafity-filesystem')
 	, main
 	;

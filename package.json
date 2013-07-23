@@ -1,10 +1,10 @@
 {
   "name": "crafity-resources",
-  "description": "Generic resource provider",
-  "author": "Bart Riemens <briemens@crafity.com>",
+  "description": "NodeJS module for multilingual resource files",
   "version": "0.1.0",
+  "author": "Galina Slavova <galina@crafity.com> and Bart Riemens <briemens@crafity.com>",
   "homepage": "https://github.com/Crafity/crafity-resources#readme",
-  "keywords": ["crafity", "resource", "globalization", "messages", "language"],
+  "keywords": ["crafity", "resource", "globalization", "messages", "language", "multilingual", "resource files", "languages" ],
   "maintainers": [
     {
       "name": "Bart Riemens",

@@ -29,7 +29,7 @@ module.exports.fullname = "crafity-resources";
  * Module version.
  */
 
-module.exports.version = '0.0.4';
+module.exports.version = '0.1.0';
 
 /**
  * Loaded configuration

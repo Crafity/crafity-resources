@@ -45,9 +45,9 @@
     }
   ],
   "dependencies": {
-    "crafity-core": "0.0.13",
-    "crafity-filesystem": "0.0.10",
-    "crafity-jstest": "0.0.5"
+    "crafity-core": "~0.1.0",
+    "crafity-filesystem": "~0.1.0",
+    "crafity-jstest": "~0.1.0"
   },
   "engines": {
     "node": "*"

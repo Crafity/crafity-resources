@@ -38,12 +38,10 @@
     }
   ],
   "bugs": "https://github.com/Crafity/crafity-resources/issues",
-  "repositories": [
-    {
+  "repository": {
       "type": "git",
       "url": "https://github.com/Crafity/crafity-resources.git"
-    }
-  ],
+    },
   "dependencies": {
     "crafity-core": "~0.1.0",
     "crafity-filesystem": "~0.1.0",

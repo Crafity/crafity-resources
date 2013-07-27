@@ -86,12 +86,12 @@ module.exports.configure = function (options, callback) {
         function resourceParser() {
           return function (req, res, next) {
             var redirect = false
-              , language
+              , parserLanguage
               , url;
 
             req.language = (req.url.match(/^(?:\/language\/)(\w+)(?:\/{0,1})/i) || [])[1];
             if (req.language) { redirect = true; }
-            language = req.language = req.language || req.query.lang || req.cookies.lang || options.defaultLanguage || "en";
+            parserLanguage = req.language = req.language || req.query.lang || req.cookies.lang || options.defaultLanguage || "en";
             url = req.query["return"] || req.headers.referer || "/";
 
 //						, resources = req.resources = getResources(language)
@@ -100,8 +100,8 @@ module.exports.configure = function (options, callback) {
 //						res.local("language", language);
 //						res.local("languages", languages);
 
-            if (language) {
-              res.cookie("lang", language, { path: "/", expires: new Date(Date.now() + sixMonths), httpOnly: true });
+            if (parserLanguage) {
+              res.cookie("lang", parserLanguage, { path: "/", expires: new Date(Date.now() + sixMonths), httpOnly: true });
             } else {
               res.clearCookie('lang', { path: "/", expires: new Date(Date.now() + sixMonths) });
             }

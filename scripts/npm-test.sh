@@ -5,9 +5,14 @@ export RootDir="$ScriptDir/.."
 export TestDir="$RootDir/test"
 export ErrorCode=0
 
+cd $RootDir
+export RootDir="`pwd`"
+export projectName="`basename $RootDir`"
+cd $CurrentDir
+
 if [ "$WATCH" != "" ]; then
 	touch .nodemonignore
-	nodemon -q -x "$ScriptDir/npm-test-jstest.sh" -w "$RootDir"
+	nodemon -x "$ScriptDir/npm-test-jstest.sh" -w "$RootDir"
 else
 	$ScriptDir/npm-test-jstest.sh
 	export ErrorCode=$?

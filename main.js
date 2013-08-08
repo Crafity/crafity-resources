@@ -35,7 +35,7 @@ module.exports.fullname = "crafity-resources";
  * Module version.
  */
 
-module.exports.version = '0.1.1';
+module.exports.version = '0.1.2';
 
 /**
  * Loaded configuration
@@ -102,7 +102,10 @@ module.exports.configure = function (options, callback) {
 
 					parserLanguage = req.language = req.language || req.query.lang || req.cookies.lang || options.defaultLanguage || "en";
 					url = req.query["return"] || req.headers.referer || "/";
-
+					
+					res.local("resources", resources);
+					res.local("language", language);
+					
 					if (parserLanguage) {
 						res.cookie("lang", parserLanguage, { path: "/", expires: new Date(Date.now() + sixMonths), httpOnly: true });
 					} else {

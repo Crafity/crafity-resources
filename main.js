@@ -85,6 +85,8 @@ module.exports.configure = function (options, callback) {
 
 			var sixMonths = (((((1000 * 60) * 60) * 24) * 30) * 6);
 
+			// TODO: extract this object to another more appropriate module file, 
+			// not the crafity-resources, but crafity.http. resources
 			function resourceParser() {
 
 				return function (req, res, next) {
@@ -121,6 +123,7 @@ module.exports.configure = function (options, callback) {
 				return Object.keys(resources);
 			}
 
+			// resources result object
 			return {
 
 				getResources: getResources,

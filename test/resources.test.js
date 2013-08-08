@@ -113,6 +113,13 @@ jstest.run({
 		);
 	}
 
+	
+	// resourcesModule.configure(options, function(err, resourcesAgent){
+	
+//	resourcesAgent.getResources 
+//	resourcesAgent.get => return the json formatted value of the resources key stirng
+
+//});
 });
 
 

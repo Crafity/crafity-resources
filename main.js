@@ -16,10 +16,12 @@
 var fs = require('crafity-filesystem')
 	, core = require('crafity-core')
 	, objects = core.objects
-	, config =
-	{
-		path: "/resources" 	// current directory
-		, defaultLanguage: "en"  										// English
+	, resourcesData = {}
+
+	, DEFAULT_CONFIG = {
+		defaultPath: "/resources", 	// current directory
+		defaultLanguage: "en",			// English
+		defaultNamespace: "default"	// Default namespace
 	}
 	;
 
@@ -41,29 +43,112 @@ module.exports.version = '0.1.2';
  * Loaded configuration
  */
 
-var resources = {};
+/**
+ * Constructor.
+ * @param language
+ * @param namespace
+ * @constructor
+ */
+function ResourcesAgent(language, namespace) {
+	console.log("TEST #2... resourcesData", resourcesData);
+	
+	
+	if (!language) {
+		throw new Error("Expected argument language.");
+	}
+	if (!namespace) {
+		throw new Error("Expected argument namespace.");
+	}
+	if (!resourcesData[language]) {
+		throw new Error("Resource Language '" + language + "' is not available");
+	}
+	if (!resourcesData[language][namespace]) {
+		throw new Error("Resource Namespace '" + namespace + "' is not available");
+	}
+
+	// returna a new instance of ResourcesAgent
+	this.getResources = function createNewResourceAgent(language, namespace) {
+		return new ResourcesAgent(language, namespace);
+	};
+
+	// extract this object to another more appropriate module file TODO
+	// not the crafity-resources, but crafity.http. resources
+	this.resourceParser = function resourceParser() {
+		var SIX_MONTHS = (((((1000 * 60) * 60) * 24) * 30) * 6)
+			;
+
+		return function requestListener(req, res, next) {
+
+			var languageFromUrl = (req.url.match(/^(?:\/language\/)(\w+)(?:\/{0,1})/i) || [])[1]
+				, languageFromRequest = languageFromUrl || req.query.lang || req.cookies.lang || language
+				, mustRedirect = languageFromUrl && true // test this TODO
+				, url = req.query["return"] || req.headers.referer || "/"
+				;
+
+			// the leading language variable for now!
+			req.language = languageFromRequest;
+			res.local("resources", resourcesData); // wat willen we hiermee
+			res.local("language", language);
+
+			if (languageFromRequest) {
+				res.cookie("lang", languageFromRequest, { path: "/", expires: new Date(Date.now() + SIX_MONTHS), httpOnly: true });
+			} else {
+				res.clearCookie('lang', { path: "/", expires: new Date(Date.now() + SIX_MONTHS) });
+			}
+
+			if (mustRedirect) {
+				if (req.query.layout) {
+					url += (url.indexOf("?") > -1 ? "&" : "?") + "layout=" + req.query.layout;
+				}
+				res.redirect(url);
+			} else {
+				next();
+			}
+		};
+
+	};
+
+	this.getLanguages = function getLanguages() {
+		return Object.keys(resourcesData);
+	};
+
+	this.getLanguage = function getLanguage() {
+		return language;
+	};
+
+	this.get = function get() {
+		var result = resourcesData[language][namespace]
+			, args = Array.prototype.slice.call(arguments);
+
+		args.forEach(function (arg) {
+			if (result) {
+				result = result[arg];
+			}
+		});
+		return result || args.join(".");
+	};
+
+}
 
 /**
  * Open a configuration
- * @param {String|Object} options (Optional) The path to the config file
+ * @param {Object|Function} [options] (Optional) The path to the config file
  * @param {Function} callback A callback called when config is loaded
  */
 module.exports.configure = function (options, callback) {
 	if (arguments.length === 0) {
 		throw new Error("Insufficient number of arguments. At least one callback argument is required.");
 	}
-
 	if (arguments.length < 2) {
 		callback = options;
-		options = config;
 	}
-
-	var path = (options !== null) ? fs.combine(process.cwd(), options.path) : config.path;
-//	console.log("TEST _ path= ", path);
+	options = options || DEFAULT_CONFIG;
+	options.path = options.path || DEFAULT_CONFIG.defaultPath;
+	options.defaultLanguage = options.defaultLanguage || DEFAULT_CONFIG.defaultLanguage;
+	options.defaultNamespace = options.defaultNamespace || DEFAULT_CONFIG.defaultNamespace;
 
 	// obtain all files with json extension
-	fs.getAllFilesWithContent(path, "*.json", function (err, files) {
-		
+	fs.getAllFilesWithContent(fs.combine(process.cwd(), options.path), "*.json", function fsLoadResourceFilesCallback(err, files) {
 		if (err) {
 			return callback("No resource json files are found. Original error: " + err);
 		}
@@ -71,97 +156,16 @@ module.exports.configure = function (options, callback) {
 			return callback("No resource json files were found.");
 		}
 
-		// define a getter
-		var getResources = function getResources(language, namespace) {
-			language = language || options.defaultLanguage || "en";
-			namespace = namespace || "default";
-
-			if (!resources[language]) {
-				throw new Error("Resource Language '" + language + "' is not available");
-			}
-			if (!resources[language][namespace]) {
-				throw new Error("Resource Namespace '" + namespace + "' is not available");
-			}
-
-			var sixMonths = (((((1000 * 60) * 60) * 24) * 30) * 6);
-
-			// TODO: extract this object to another more appropriate module file, 
-			// not the crafity-resources, but crafity.http. resources
-			function resourceParser() {
-
-				return function (req, res, next) {
-
-					var redirect = false
-						, parserLanguage
-						, url;
-
-					req.language = (req.url.match(/^(?:\/language\/)(\w+)(?:\/{0,1})/i) || [])[1];
-					if (req.language) {
-						redirect = true;
-					}
-
-					parserLanguage = req.language = req.language || req.query.lang || req.cookies.lang || options.defaultLanguage || "en";
-					url = req.query["return"] || req.headers.referer || "/";
-					
-					res.local("resources", resources);
-					res.local("language", language);
-					
-					if (parserLanguage) {
-						res.cookie("lang", parserLanguage, { path: "/", expires: new Date(Date.now() + sixMonths), httpOnly: true });
-					} else {
-						res.clearCookie('lang', { path: "/", expires: new Date(Date.now() + sixMonths) });
-					}
-					if (redirect) {
-						if (req.query.layout) {
-							url += (url.indexOf("?") > -1 ? "&" : "?") + "layout=" + req.query.layout;
-						}
-						res.redirect(url);
-					} else {
-						next();
-					}
-				};
-			}
-
-			function getLanguages() {
-				return Object.keys(resources);
-			}
-
-			// resources result object
-			return {
-
-				getResources: getResources,
-				resourceParser: resourceParser,
-				getLanguages: getLanguages,
-
-				getLanguage: function () {
-					return language;
-				},
-
-				get: function () {
-					var result = resources[language][namespace]
-						, args = Array.prototype.slice.call(arguments);
-
-					args.forEach(function (arg) {
-						if (result) {
-							result = result[arg];
-						}
-					});
-					return result || args.join(".");
-				}
-
-			};
-
-		};
-
 		try {
 
 			objects.forEach(files, function (fileContent, filename) {
-
 				var filenameParts = filename.split('.')
-					, namespace, language, parsedResource;
+					, namespace
+					, language
+					, loadedResourceData;
 
-//				console.log("filenameParts[0]", filenameParts[0]);
-//				console.log("filenameParts[1]", filenameParts[1]);
+				//				console.log("filenameParts[0]", filenameParts[0]);
+				//				console.log("filenameParts[1]", filenameParts[1]);
 				if (filenameParts.length === 2) {
 					namespace = "default";
 					language = filenameParts[0];
@@ -169,29 +173,32 @@ module.exports.configure = function (options, callback) {
 				} else if (filenameParts.length === 3) {
 
 					namespace = filenameParts[0];
-					console.log("filenameParts[2]", filenameParts[2]);
+//					console.log("filenameParts[2]", filenameParts[2]);
 					language = filenameParts[1];
 
 				} else {
-					
-					throw new Error("Invalid resource file name '" + filename + "'");
+					throw new Error("Invalid resource file name '" + filename + "'"); // unit test this! TODO
 				}
 
-				resources[language] = resources[language] || {};
-				resources[language][namespace] = resources[language][namespace] || {};
+				// initialization trick: if resourceData = {} => resourceData = { <language>: {} }
+				console.log("TEST #1...");
+				resourcesData[language] = resourcesData[language] || {};
+				resourcesData[language][namespace] = resourcesData[language][namespace] || {};
 
-				console.log("resources[language] = ", resources[language]);
-				console.log("resources[language][namespace] = ", resources[language][namespace]);
+//				console.log("resourcesData[language] = ", resourcesData[language]);
+//				console.log("resourcesData[language][namespace] = ", resourcesData[language][namespace]);
+
 				try {
 
-					parsedResource = JSON.parse(fileContent.toString());
+					loadedResourceData = JSON.parse(fileContent.toString());
 
 				} catch (err) {
 
 					throw new Error("Error while parsing resource file '" + filename + "'. " + err.toString());
 				}
-				
-				objects.extend(resources[language][namespace], parsedResource);
+
+				// shallow copy of all properties to destinationArg from sourceArg 
+				objects.extend(resourcesData[language][namespace], loadedResourceData);
 			});
 
 		} catch (err2) {
@@ -199,7 +206,9 @@ module.exports.configure = function (options, callback) {
 			return callback(err2);
 		}
 
-		console.log("\nTEST = resources = ", resources);
-		return callback(null, getResources());
+		// happy flow
+		return callback(null, new ResourcesAgent(options.defaultLanguage, options.defaultNamespace));
+
 	});
-};
+}
+;

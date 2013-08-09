@@ -17,6 +17,7 @@ var fs = require('crafity-filesystem')
 	, core = require('crafity-core')
 	, objects = core.objects
 
+
 	, DEFAULT_CONFIG = {
 		defaultPath: "/resources", 	// current directory
 		defaultLanguage: "en",			// English
@@ -78,13 +79,17 @@ function ResourcesAgent(resourcesData, language, namespace) {
 			var languageFromUrl = (req.url.match(/^(?:\/language\/)(\w+)(?:\/{0,1})/i) || [])[1]
 				, languageFromRequest = languageFromUrl || req.query.lang || req.cookies.lang || language
 				, mustRedirect = languageFromUrl && true // test this TODO
+				, resourceAgent = new ResourcesAgent(languageFromRequest, namespace)
 				, url = req.query["return"] || req.headers.referer || "/"
 				;
 
 			// the leading language variable for now!
 			req.language = languageFromRequest;
-			res.local("resources", resourcesData); // wat willen we hiermee
-			res.local("language", language);
+			req.resources = resourceAgent;
+			
+			res.local("resources", resourceAgent); // wat willen we hiermee
+			res.local("languages", resourceAgent.getLanguages()); // wat willen we hiermee
+			res.local("language", languageFromRequest);
 
 			if (languageFromRequest) {
 				res.cookie("lang", languageFromRequest, { path: "/", expires: new Date(Date.now() + SIX_MONTHS), httpOnly: true });
@@ -148,7 +153,6 @@ module.exports.configure = function (options, callback) {
 
 	// obtain all files with json extension
 	fs.getAllFilesWithContent(fs.combine(process.cwd(), options.path), "*.json", function fsLoadResourceFilesCallback(err, files) {
-//		console.log("files", files);
 		if (err) {
 			return callback(new Error("No resource json files are found. Original error: " + err));
 		}
@@ -191,16 +195,17 @@ module.exports.configure = function (options, callback) {
 
 					loadedResourceData = JSON.parse(fileContent.toString());
 
-				} catch (err1) {
+				} catch (err) {
 
-					throw new Error("Error while parsing resource file '" + filename + "'. " + err1.toString());
+					throw new Error("Error while parsing resource file '" + filename + "'. " + err.toString());
 				}
 
 				// shallow copy of all properties to destinationArg from sourceArg 
 				objects.extend(resourcesData[language][namespace], loadedResourceData);
-			}); // end loop
+			});
 
 		} catch (err2) {
+
 			return callback(err2);
 		}
 

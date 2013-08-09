@@ -37,7 +37,7 @@ module.exports.fullname = "crafity-resources";
  * Module version.
  */
 
-module.exports.version = '0.1.2';
+module.exports.version = '0.1.3';
 
 /**
  * Constructor.
@@ -47,15 +47,16 @@ module.exports.version = '0.1.2';
  * @constructor
  */
 function ResourcesAgent(resourcesData, language, namespace) {
+	if (!resourcesData || (resourcesData && typeof resourcesData !== "object")) {
+		throw new Error("Expected ResourceData.");
+	}
 	if (!language) {
 		throw new Error("Expected argument language.");
 	}
 	if (!namespace) {
 		throw new Error("Expected argument namespace.");
 	}
-	if (!resourcesData){
-		throw new Error("Expected ResourceData.");
-	}
+
 	if (!resourcesData[language]) {
 		throw new Error("Resource Language '" + language + "' is not available");
 	}
@@ -65,7 +66,7 @@ function ResourcesAgent(resourcesData, language, namespace) {
 
 	// returna a new instance of ResourcesAgent
 	this.getResources = function createNewResourceAgent(language, namespace) {
-		return new ResourcesAgent(language, namespace);
+		return new ResourcesAgent(resourcesData, language, namespace);
 	};
 
 	// extract this object to another more appropriate module file TODO
@@ -86,7 +87,7 @@ function ResourcesAgent(resourcesData, language, namespace) {
 			// the leading language variable for now!
 			req.language = languageFromRequest;
 			req.resources = resourceAgent;
-			
+
 			res.local("resources", resourceAgent); // wat willen we hiermee
 			res.local("languages", resourceAgent.getLanguages()); // wat willen we hiermee
 			res.local("language", languageFromRequest);
@@ -106,7 +107,6 @@ function ResourcesAgent(resourcesData, language, namespace) {
 				next();
 			}
 		};
-
 	};
 
 	this.getLanguages = function getLanguages() {
@@ -121,6 +121,7 @@ function ResourcesAgent(resourcesData, language, namespace) {
 		var result = resourcesData[language][namespace]
 			, args = Array.prototype.slice.call(arguments);
 
+		
 		args.forEach(function (arg) {
 			if (result) {
 				result = result[arg];
@@ -144,7 +145,7 @@ module.exports.configure = function (options, callback) {
 		callback = options;
 		options = null;
 	}
-	
+
 	var resourcesData = {};
 	options = options || DEFAULT_CONFIG;
 	options.path = options.path || DEFAULT_CONFIG.defaultPath;
@@ -168,8 +169,6 @@ module.exports.configure = function (options, callback) {
 					, language
 					, loadedResourceData;
 
-				//				console.log("filenameParts[0]", filenameParts[0]);
-				//				console.log("filenameParts[1]", filenameParts[1]);
 				if (filenameParts.length === 2) {
 					namespace = "default";
 					language = filenameParts[0];
@@ -177,7 +176,6 @@ module.exports.configure = function (options, callback) {
 				} else if (filenameParts.length === 3) {
 
 					namespace = filenameParts[0];
-//					console.log("filenameParts[2]", filenameParts[2]);
 					language = filenameParts[1];
 
 				} else {
@@ -187,9 +185,6 @@ module.exports.configure = function (options, callback) {
 				// initialization trick: if resourceData = {} => resourceData = { <language>: {} }
 				resourcesData[language] = resourcesData[language] || {};
 				resourcesData[language][namespace] = resourcesData[language][namespace] || {};
-
-//				console.log("resourcesData[language] = ", resourcesData[language]);
-//				console.log("resourcesData[language][namespace] = ", resourcesData[language][namespace]);
 
 				try {
 
@@ -216,4 +211,5 @@ module.exports.configure = function (options, callback) {
 }
 ;
 
+// exposed in outer scope for unit testing
 module.exports.ResourcesAgent = ResourcesAgent;

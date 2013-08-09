@@ -16,7 +16,6 @@
 var fs = require('crafity-filesystem')
 	, core = require('crafity-core')
 	, objects = core.objects
-	, resourcesData = {}
 
 	, DEFAULT_CONFIG = {
 		defaultPath: "/resources", 	// current directory
@@ -40,24 +39,21 @@ module.exports.fullname = "crafity-resources";
 module.exports.version = '0.1.2';
 
 /**
- * Loaded configuration
- */
-
-/**
  * Constructor.
+ * @param resourcesData
  * @param language
  * @param namespace
  * @constructor
  */
-function ResourcesAgent(language, namespace) {
-	console.log("TEST #2... resourcesData", resourcesData);
-	
-	
+function ResourcesAgent(resourcesData, language, namespace) {
 	if (!language) {
 		throw new Error("Expected argument language.");
 	}
 	if (!namespace) {
 		throw new Error("Expected argument namespace.");
+	}
+	if (!resourcesData){
+		throw new Error("Expected ResourceData.");
 	}
 	if (!resourcesData[language]) {
 		throw new Error("Resource Language '" + language + "' is not available");
@@ -141,7 +137,10 @@ module.exports.configure = function (options, callback) {
 	}
 	if (arguments.length < 2) {
 		callback = options;
+		options = null;
 	}
+	
+	var resourcesData = {};
 	options = options || DEFAULT_CONFIG;
 	options.path = options.path || DEFAULT_CONFIG.defaultPath;
 	options.defaultLanguage = options.defaultLanguage || DEFAULT_CONFIG.defaultLanguage;
@@ -149,11 +148,12 @@ module.exports.configure = function (options, callback) {
 
 	// obtain all files with json extension
 	fs.getAllFilesWithContent(fs.combine(process.cwd(), options.path), "*.json", function fsLoadResourceFilesCallback(err, files) {
+//		console.log("files", files);
 		if (err) {
-			return callback("No resource json files are found. Original error: " + err);
+			return callback(new Error("No resource json files are found. Original error: " + err));
 		}
 		if (Object.keys(files).length === 0) {
-			return callback("No resource json files were found.");
+			return callback(new Error("No resource json files were found."));
 		}
 
 		try {
@@ -181,7 +181,6 @@ module.exports.configure = function (options, callback) {
 				}
 
 				// initialization trick: if resourceData = {} => resourceData = { <language>: {} }
-				console.log("TEST #1...");
 				resourcesData[language] = resourcesData[language] || {};
 				resourcesData[language][namespace] = resourcesData[language][namespace] || {};
 
@@ -192,23 +191,24 @@ module.exports.configure = function (options, callback) {
 
 					loadedResourceData = JSON.parse(fileContent.toString());
 
-				} catch (err) {
+				} catch (err1) {
 
-					throw new Error("Error while parsing resource file '" + filename + "'. " + err.toString());
+					throw new Error("Error while parsing resource file '" + filename + "'. " + err1.toString());
 				}
 
 				// shallow copy of all properties to destinationArg from sourceArg 
 				objects.extend(resourcesData[language][namespace], loadedResourceData);
-			});
+			}); // end loop
 
 		} catch (err2) {
-
 			return callback(err2);
 		}
 
 		// happy flow
-		return callback(null, new ResourcesAgent(options.defaultLanguage, options.defaultNamespace));
+		return callback(null, new ResourcesAgent(resourcesData, options.defaultLanguage, options.defaultNamespace));
 
 	});
 }
 ;
+
+module.exports.ResourcesAgent = ResourcesAgent;

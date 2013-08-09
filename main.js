@@ -50,9 +50,6 @@ module.exports.version = '0.1.2';
  * @constructor
  */
 function ResourcesAgent(language, namespace) {
-	console.log("TEST #2... resourcesData", resourcesData);
-	
-	
 	if (!language) {
 		throw new Error("Expected argument language.");
 	}
@@ -82,13 +79,17 @@ function ResourcesAgent(language, namespace) {
 			var languageFromUrl = (req.url.match(/^(?:\/language\/)(\w+)(?:\/{0,1})/i) || [])[1]
 				, languageFromRequest = languageFromUrl || req.query.lang || req.cookies.lang || language
 				, mustRedirect = languageFromUrl && true // test this TODO
+				, resourceAgent = new ResourcesAgent(languageFromRequest, namespace)
 				, url = req.query["return"] || req.headers.referer || "/"
 				;
 
 			// the leading language variable for now!
 			req.language = languageFromRequest;
-			res.local("resources", resourcesData); // wat willen we hiermee
-			res.local("language", language);
+			req.resources = resourceAgent;
+			
+			res.local("resources", resourceAgent); // wat willen we hiermee
+			res.local("languages", resourceAgent.getLanguages()); // wat willen we hiermee
+			res.local("language", languageFromRequest);
 
 			if (languageFromRequest) {
 				res.cookie("lang", languageFromRequest, { path: "/", expires: new Date(Date.now() + SIX_MONTHS), httpOnly: true });
@@ -164,8 +165,6 @@ module.exports.configure = function (options, callback) {
 					, language
 					, loadedResourceData;
 
-				//				console.log("filenameParts[0]", filenameParts[0]);
-				//				console.log("filenameParts[1]", filenameParts[1]);
 				if (filenameParts.length === 2) {
 					namespace = "default";
 					language = filenameParts[0];
@@ -173,7 +172,6 @@ module.exports.configure = function (options, callback) {
 				} else if (filenameParts.length === 3) {
 
 					namespace = filenameParts[0];
-//					console.log("filenameParts[2]", filenameParts[2]);
 					language = filenameParts[1];
 
 				} else {
@@ -181,12 +179,8 @@ module.exports.configure = function (options, callback) {
 				}
 
 				// initialization trick: if resourceData = {} => resourceData = { <language>: {} }
-				console.log("TEST #1...");
 				resourcesData[language] = resourcesData[language] || {};
 				resourcesData[language][namespace] = resourcesData[language][namespace] || {};
-
-//				console.log("resourcesData[language] = ", resourcesData[language]);
-//				console.log("resourcesData[language][namespace] = ", resourcesData[language][namespace]);
 
 				try {
 

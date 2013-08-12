@@ -80,7 +80,7 @@ function ResourcesAgent(resourcesData, language, namespace) {
 			var languageFromUrl = (req.url.match(/^(?:\/language\/)(\w+)(?:\/{0,1})/i) || [])[1]
 				, languageFromRequest = languageFromUrl || req.query.lang || req.cookies.lang || language
 				, mustRedirect = languageFromUrl && true // test this TODO
-				, resourceAgent = new ResourcesAgent(languageFromRequest, namespace)
+				, resourceAgent = new ResourcesAgent(resourcesData, languageFromRequest, namespace)
 				, url = req.query["return"] || req.headers.referer || "/"
 				;
 

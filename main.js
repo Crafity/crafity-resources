@@ -37,7 +37,7 @@ module.exports.fullname = "crafity-resources";
  * Module version.
  */
 
-module.exports.version = '0.1.3';
+module.exports.version = '0.1.4';
 
 /**
  * Constructor.
